@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>今日のポケモン</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <style>
+    #pokemon {
+      width: 300px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    #pokemonImage {
+      width: 100%;
+      image-rendering: pixelated;
+      display: none;
+    }
+    .pokemon-name {
+      margin: 0.5em 0;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1>今日のラッキーポケモン</h1>
+    
+    <div id="pokemon">
+      <h2 id="pokemonJapaneseName" class="pokemon-name"></h2>
+      <img id="pokemonImage" src="" alt="ポケモンの画像">
+    </div>
+  </main>
+
+  <script>
+    const pokemonJapaneseName = document.getElementById('pokemonJapaneseName');
+    const pokemonImage = document.getElementById('pokemonImage');
+
+    // ポケモンは現在898種
+    const pokemonNumber = Math.floor(Math.random() * 898) + 1;
+   
+    // PokéAPIからデータを取得し、名前と画像を表示
+    Promise.all([
+      fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonNumber}`).then(response => response.json()),
+      fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemonNumber}`).then(response => response.json())
+    ])
+      .then(([pokemonData, speciesData]) => {
+        // 日本語名を表示
+        const japaneseName = speciesData.names.find(name => name.language.name === 'ja');
+        if (japaneseName) {
+          pokemonJapaneseName.textContent = japaneseName.name;
+        }
+        
+        // 画像の読み込みが完了したら表示
+        pokemonImage.onload = () => {
+          pokemonImage.style.display = 'block';
+        };
+        
+        // ポケモンの画像を設定
+        pokemonImage.src = pokemonData.sprites.front_default;
+      })
+      .catch(error => {
+        console.error(`エラーが発生しました: ${error}`);
+        pokemonJapaneseName.textContent = 'ポケモンの取得に失敗しました';
+      });
+  </script>
+</body>
+</html>
